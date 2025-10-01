@@ -1,0 +1,74 @@
+# Stori is cool
+# Configuration for ML pipeline
+
+#(9)
+#paths (input, outputs, modelo, predicciones, plots, test data)
+#data (target_column)
+#preprocessing (estrategia para numéricas NaN, para categóricas, para outliers,
+#como codificar categóricas, y que se tienen que escalar)
+#training (cv folds, random state, validation_split)
+#feature_selection (min features, elimination step, importance threshold)
+#tuning (para xgboost: use label encoder y evalmetric)
+#initial search (n_iter y param_grid(7))
+#final_search igual
+paths:
+  input_data: "data/input.csv"
+  output_dir: "outputs/"
+  model_dir: "outputs/model/"
+  predictions_dir: "outputs/predictions/"
+  plots_dir: "outputs/plots"
+  test_data_path: outputs/processed_data_test.csv #must remain like this
+
+data:
+  target_column: "target"   # specify explicitly so pipeline knows what to predict
+
+preprocessing:
+  handle_missing_numeric: "median"   # options: median, mean
+  handle_missing_categorical: "mode" # options: mode, constant
+  outlier_strategy: "cap"            # options: cap
+  categorical_encoding: "ordinal"     # options: ordinal
+  scale_numeric: true
+  test_split: 0.2
+
+training:
+  cv_folds: 5
+  random_state: 42
+  validation_split: 0.2
+
+feature_selection:
+  min_features: 5
+  elimination_step: 1   # how many least-important features to drop per iteration
+  importance_threshold: 0.01
+
+
+tuning:
+  xgboost_defaults:
+    use_label_encoder: false
+    eval_metric: "logloss"
+
+  initial_search:
+    n_iter: 20
+    param_grid:
+      n_estimators: [100, 300, 500]
+      max_depth: [3, 6, 9]
+      learning_rate: [0.01, 0.1, 0.3]
+      subsample: [0.7, 1.0]
+      colsample_bytree: [0.7, 1.0]
+      reg_alpha: [0, 0.1, 1]
+      reg_lambda: [1, 10]
+  
+  final_search:
+    n_iter: 50
+    param_bounds:
+      n_estimators: [100, 1000]
+      max_depth: [3, 10]
+      learning_rate: [0.01, 0.3]
+      subsample: [0.5, 1.0]
+      colsample_bytree: [0.5, 1.0]
+      reg_alpha: [0, 1]
+      reg_lambda: [0.1, 10]
+
+interpretability:
+  shap_summary_plot: true
+  shap_dependence_plot: true
+
